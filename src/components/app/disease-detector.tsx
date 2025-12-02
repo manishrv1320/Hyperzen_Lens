@@ -235,13 +235,25 @@ export function DiseaseDetector() {
             <Card className="w-full max-w-2xl mt-12 shadow-2xl bg-card border-t-4 border-primary">
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl">Get Started</CardTitle>
-                    <CardDescription>Upload an image of a plant leaf to begin your analysis.</CardDescription>
+                    <CardDescription>Use your camera or upload an image to begin your analysis.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form ref={formRef} action={formAction} className="space-y-6">
                         <input type="hidden" name="photoDataUri" ref={photoDataUriRef} />
+
+                        <Button type="button" variant="outline" className="w-full py-6 text-lg" onClick={handleOpenCamera}>
+                          <Camera className="mr-2" />
+                          Use Your Camera
+                        </Button>
+
+                        <div className="flex items-center space-x-4">
+                          <Separator className="flex-1" />
+                          <span className="text-sm text-muted-foreground font-semibold">OR</span>
+                          <Separator className="flex-1" />
+                        </div>
+                        
                         <div className="space-y-2">
-                            <Label htmlFor="plantImage" className="text-lg font-semibold">Plant Leaf Image</Label>
+                            <Label htmlFor="plantImage" className="text-lg font-semibold sr-only">Plant Leaf Image</Label>
                             <label
                               htmlFor="plantImage"
                               onDrop={handleDrop}
@@ -281,17 +293,6 @@ export function DiseaseDetector() {
                             </label>
                             <Input id="plantImage" name="plantImage" type="file" className="hidden" ref={fileInputRef} onChange={handleImageChange} accept="image/png, image/jpeg, image/webp"/>
                         </div>
-
-                        <div className="flex items-center space-x-4">
-                          <Separator className="flex-1" />
-                          <span className="text-sm text-muted-foreground font-semibold">OR</span>
-                          <Separator className="flex-1" />
-                        </div>
-
-                        <Button type="button" variant="outline" className="w-full py-6 text-lg" onClick={handleOpenCamera}>
-                          <Camera className="mr-2" />
-                          Use Your Camera
-                        </Button>
                         
                         {state.error && (
                             <div className="flex items-center gap-2 text-destructive text-sm p-3 bg-destructive/10 rounded-md">
