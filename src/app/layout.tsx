@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: "Hyperzen Lens",
   description: "AI-powered plant disease detection and care.",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
