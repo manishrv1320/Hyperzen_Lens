@@ -3,7 +3,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: "Verdant Vision",
+  title: "Hyperzen Lens",
   description: "AI-powered plant disease detection and care.",
 };
 

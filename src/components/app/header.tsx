@@ -6,7 +6,7 @@ export function Header() {
       <div className="container mx-auto flex items-center gap-2">
         <Leaf className="size-6 text-primary" />
         <h1 className="text-2xl font-bold font-headline text-primary">
-          Verdant Vision
+          Hyperzen Lens
         </h1>
       </div>
     </header>
