@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useRef, useState, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import Image from 'next/image';
 import { analyzePlantDisease, type FormState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -44,7 +44,7 @@ function SubmitButton() {
 }
 
 export function DiseaseDetector() {
-  const [state, formAction] = useFormState(analyzePlantDisease, initialState);
+  const [state, formAction] = useActionState(analyzePlantDisease, initialState);
   const { toast } = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
