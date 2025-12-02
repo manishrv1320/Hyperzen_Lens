@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useRef, useState, useActionState } from 'react';
@@ -11,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { LoaderCircle, UploadCloud, Leaf, AlertCircle, Camera, X } from 'lucide-react';
+import { LoaderCircle, UploadCloud, Leaf, AlertCircle, Camera, X, Check } from 'lucide-react';
 import { ResultsDisplay } from './results-display';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
@@ -26,7 +25,7 @@ function SubmitButton() {
     <Button
       type="submit"
       disabled={pending}
-      className="w-full font-bold text-lg py-6 bg-accent text-accent-foreground hover:bg-accent/90"
+      className="w-full font-bold text-lg py-7 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
       aria-label="Analyze Plant"
     >
       {pending ? (
@@ -89,7 +88,10 @@ export function DiseaseDetector() {
         }
       };
       getCameraPermission();
+    } else {
+        stopCameraStream();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCameraOpen, toast]);
 
   useEffect(() => {
@@ -101,6 +103,12 @@ export function DiseaseDetector() {
       });
     }
     if (state.success) {
+        toast({
+            variant: 'default',
+            title: 'Analysis Complete',
+            description: 'Your plant analysis results are ready.',
+            className: 'bg-primary text-primary-foreground',
+        })
       document.getElementById('results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       stopCameraStream();
       setIsCameraOpen(false);
@@ -161,7 +169,7 @@ export function DiseaseDetector() {
   const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.classList.remove('border-primary');
+    e.currentTarget.classList.remove('border-primary', 'ring-2', 'ring-primary');
     const file = e.dataTransfer.files?.[0];
     if (file && fileInputRef.current) {
         const dataTransfer = new DataTransfer();
@@ -174,39 +182,39 @@ export function DiseaseDetector() {
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.classList.add('border-primary');
+    e.currentTarget.classList.add('border-primary', 'ring-2', 'ring-primary');
   };
 
   const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.classList.remove('border-primary');
+    e.currentTarget.classList.remove('border-primary', 'ring-2', 'ring-primary');
   };
 
   return (
-    <div className="w-full flex-grow flex flex-col items-center px-4 py-8 md:py-12">
+    <div className="w-full flex-grow flex flex-col items-center px-4 py-8 md:py-16">
         <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold font-headline text-primary tracking-tight">
                 Identify Plant Diseases in a Snap
             </h1>
-            <p className="mt-4 text-lg text-foreground/80">
+            <p className="mt-4 text-lg md:text-xl text-foreground/80">
                 Upload a photo of a plant leaf, and our AI will identify the plant, detect potential diseases, and provide personalized care tips.
             </p>
         </div>
 
         {isCameraOpen ? (
-          <Card className="w-full max-w-2xl mt-8 shadow-xl bg-card/80 backdrop-blur-sm">
+          <Card className="w-full max-w-2xl mt-12 shadow-2xl bg-card border-t-4 border-primary">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle className="font-headline text-3xl">Camera Preview</CardTitle>
+                <CardTitle className="font-headline text-3xl flex items-center gap-2"><Camera /> Camera Preview</CardTitle>
                 <Button variant="ghost" size="icon" onClick={handleCloseCamera}>
                   <X className="h-6 w-6" />
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="relative aspect-video bg-black rounded-md">
-                <video ref={videoRef} className="w-full h-full object-contain rounded-md" autoPlay playsInline muted />
+              <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+                <video ref={videoRef} className="w-full h-full object-contain" autoPlay playsInline muted />
               </div>
               {hasCameraPermission === false && (
                 <Alert variant="destructive">
@@ -224,34 +232,40 @@ export function DiseaseDetector() {
             </CardContent>
           </Card>
         ) : (
-            <Card className="w-full max-w-2xl mt-8 shadow-xl bg-card/80 backdrop-blur-sm">
+            <Card className="w-full max-w-2xl mt-12 shadow-2xl bg-card border-t-4 border-primary">
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl">Get Started</CardTitle>
-                    <CardDescription>Upload an image to begin your analysis.</CardDescription>
+                    <CardDescription>Upload an image of a plant leaf to begin your analysis.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form ref={formRef} action={formAction} className="space-y-6">
                         <input type="hidden" name="photoDataUri" ref={photoDataUriRef} />
                         <div className="space-y-2">
-                            <Label className="text-lg font-semibold">Plant Leaf Image</Label>
+                            <Label htmlFor="plantImage" className="text-lg font-semibold">Plant Leaf Image</Label>
                             <label
                               htmlFor="plantImage"
                               onDrop={handleDrop}
                               onDragOver={handleDragOver}
                               onDragLeave={handleDragLeave}
-                              className="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                              className="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-secondary/30 hover:bg-secondary/50 transition-all duration-300 ease-in-out"
                             >
                                 {imagePreview ? (
+                                  <>
                                     <Image src={imagePreview} alt="Plant leaf preview" fill className="object-contain rounded-lg p-2"/>
+                                    <div className="absolute top-2 right-2 flex items-center gap-2 bg-primary text-primary-foreground text-xs font-bold py-1 px-2 rounded-full">
+                                        <Check className="size-4" />
+                                        <span>Image selected</span>
+                                    </div>
+                                  </>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                                        <UploadCloud className="w-10 h-10 mb-3 text-muted-foreground" />
-                                        <p className="mb-2 text-sm text-muted-foreground">
-                                            <span className="font-semibold">Click to upload</span> or drag and drop
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center text-muted-foreground">
+                                        <UploadCloud className="w-12 h-12 mb-4" />
+                                        <p className="mb-2 text-lg">
+                                            <span className="font-semibold text-primary">Click to upload</span> or drag and drop
                                         </p>
-                                        <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP</p>
+                                        <p className="text-sm">PNG, JPG, or WEBP</p>
                                         {placeholderImage && (
-                                            <div className="absolute inset-0 -z-10 opacity-10">
+                                            <div className="absolute inset-0 -z-10 opacity-5">
                                                 <Image
                                                     src={placeholderImage.imageUrl}
                                                     alt={placeholderImage.description}
@@ -268,15 +282,15 @@ export function DiseaseDetector() {
                             <Input id="plantImage" name="plantImage" type="file" className="hidden" ref={fileInputRef} onChange={handleImageChange} accept="image/png, image/jpeg, image/webp"/>
                         </div>
 
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-4">
                           <Separator className="flex-1" />
-                          <span className="text-xs text-muted-foreground">OR</span>
+                          <span className="text-sm text-muted-foreground font-semibold">OR</span>
                           <Separator className="flex-1" />
                         </div>
 
-                        <Button type="button" variant="outline" className="w-full" onClick={handleOpenCamera}>
+                        <Button type="button" variant="outline" className="w-full py-6 text-lg" onClick={handleOpenCamera}>
                           <Camera className="mr-2" />
-                          Use Camera
+                          Use Your Camera
                         </Button>
                         
                         {state.error && (
