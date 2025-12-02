@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import Image from 'next/image';
 import { analyzePlantDisease, type FormState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { LoaderCircle, UploadCloud, Leaf, AlertCircle, Camera, X, Check } from 'lucide-react';
+import { LoaderCircle, UploadCloud, Leaf, AlertCircle, Camera, X, Check, Zap, RefreshCw } from 'lucide-react';
 import { ResultsDisplay } from './results-display';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
@@ -44,11 +44,13 @@ function SubmitButton() {
 }
 
 export function DiseaseDetector() {
-  const [state, formAction] = useActionState(analyzePlantDisease, initialState);
+  const [state, formAction] = useFormState(analyzePlantDisease, initialState);
   const { toast } = useToast();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [isFlashOn, setIsFlashOn] = useState(false);
 
   const formRef = useRef<HTMLFormElement>(null);
   const photoDataUriRef = useRef<HTMLInputElement>(null);
@@ -59,11 +61,12 @@ export function DiseaseDetector() {
   const placeholderImage = PlaceHolderImages.find(img => img.id === 'plant-leaf-placeholder');
   
   useEffect(() => {
-    if (isCameraOpen) {
-      const getCameraPermission = async () => {
+    let stream: MediaStream | null = null;
+    const getCameraPermission = async () => {
+      if (isCameraOpen) {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
             setHasCameraPermission(true);
             if (videoRef.current) {
               videoRef.current.srcObject = stream;
@@ -86,13 +89,16 @@ export function DiseaseDetector() {
             });
             setIsCameraOpen(false);
         }
-      };
-      getCameraPermission();
-    } else {
-        stopCameraStream();
+      }
+    };
+    getCameraPermission();
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCameraOpen, toast]);
+  }, [isCameraOpen, facingMode, toast]);
 
   useEffect(() => {
     if (state.error) {
@@ -151,6 +157,42 @@ export function DiseaseDetector() {
     }
   };
 
+  const switchCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  };
+
+  const toggleFlash = async () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const videoTrack = stream.getVideoTracks()[0];
+      const capabilities = videoTrack.getCapabilities();
+
+      // @ts-ignore - torch is a valid capability but not in all TS libs
+      if (capabilities.torch) {
+        try {
+          await videoTrack.applyConstraints({
+            // @ts-ignore
+            advanced: [{ torch: !isFlashOn }]
+          });
+          setIsFlashOn(!isFlashOn);
+        } catch(err) {
+          console.error('Error toggling flash:', err);
+          toast({
+            variant: 'destructive',
+            title: 'Flash Not Supported',
+            description: 'Could not toggle flash on this device.'
+          });
+        }
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Flash Not Supported',
+          description: 'This camera does not have flash capabilities.'
+        });
+      }
+    }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -198,7 +240,7 @@ export function DiseaseDetector() {
                 Identify Plant Diseases in a Snap
             </h1>
             <p className="mt-4 text-lg md:text-xl text-foreground/80">
-                Upload a photo of a plant leaf, and our AI will identify the plant, detect potential diseases, and provide personalized care tips.
+                Use your camera or upload a photo of a plant leaf, and our AI will identify the plant, detect potential diseases, and provide personalized care tips.
             </p>
         </div>
 
@@ -215,6 +257,14 @@ export function DiseaseDetector() {
             <CardContent className="space-y-4">
               <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
                 <video ref={videoRef} className="w-full h-full object-contain" autoPlay playsInline muted />
+                <div className="absolute bottom-4 left-4 flex gap-2">
+                  <Button variant="secondary" size="icon" onClick={switchCamera}>
+                    <RefreshCw />
+                  </Button>
+                  <Button variant={isFlashOn ? 'default' : 'secondary'} size="icon" onClick={toggleFlash}>
+                    <Zap />
+                  </Button>
+                </div>
               </div>
               {hasCameraPermission === false && (
                 <Alert variant="destructive">
@@ -240,7 +290,7 @@ export function DiseaseDetector() {
                 <CardContent>
                     <form ref={formRef} action={formAction} className="space-y-6">
                         <input type="hidden" name="photoDataUri" ref={photoDataUriRef} />
-
+                        
                         <Button type="button" variant="outline" className="w-full py-6 text-lg" onClick={handleOpenCamera}>
                           <Camera className="mr-2" />
                           Use Your Camera
@@ -251,7 +301,7 @@ export function DiseaseDetector() {
                           <span className="text-sm text-muted-foreground font-semibold">OR</span>
                           <Separator className="flex-1" />
                         </div>
-                        
+
                         <div className="space-y-2">
                             <Label htmlFor="plantImage" className="text-lg font-semibold sr-only">Plant Leaf Image</Label>
                             <label
