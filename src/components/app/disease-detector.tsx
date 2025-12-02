@@ -225,7 +225,7 @@ export function DiseaseDetector() {
                   </AlertDescription>
                 </Alert>
               )}
-              <Button onClick={handleCapture} className="w-full py-6 text-lg" disabled={hasCameraPermission === false}>
+              <Button onClick={handleCapture} className="w-full py-6 text-lg bg-[#006400] hover:bg-[#006400]/90 text-white" disabled={hasCameraPermission === false}>
                 <Camera className="mr-2" />
                 Capture Image
               </Button>
