@@ -2,16 +2,15 @@
 
 import { z } from 'zod';
 import { detectDisease, type DetectDiseaseOutput } from '@/ai/flows/disease-detection';
-import { generatePreventionTips, type PreventionTipsOutput } from '@/ai/flows/personalized-prevention-tips';
+import { generateTreatmentTips, type TreatmentTipsOutput } from '@/ai/flows/personalized-prevention-tips';
 
 const formSchema = z.object({
-  plantName: z.string().min(1, 'Plant name is required.'),
   photoDataUri: z.string().min(1, 'Plant image is required.'),
 });
 
 export type FormState = {
   detection?: DetectDiseaseOutput;
-  prevention?: PreventionTipsOutput;
+  treatment?: TreatmentTipsOutput;
   error?: string;
   success: boolean;
 };
@@ -22,7 +21,6 @@ export async function analyzePlantDisease(
 ): Promise<FormState> {
   try {
     const rawFormData = {
-      plantName: formData.get('plantName'),
       photoDataUri: formData.get('photoDataUri'),
     };
 
@@ -35,7 +33,7 @@ export async function analyzePlantDisease(
       };
     }
     
-    const { plantName, photoDataUri } = validatedFields.data;
+    const { photoDataUri } = validatedFields.data;
 
     const detectionResult = await detectDisease({ photoDataUri });
 
@@ -44,19 +42,19 @@ export async function analyzePlantDisease(
     }
     
     if (detectionResult.diseaseDetected) {
-      const preventionResult = await generatePreventionTips({
-        plantName,
+      const treatmentResult = await generateTreatmentTips({
+        plantName: detectionResult.plantName,
         diseaseName: detectionResult.diseaseName,
       });
 
-      if (!preventionResult) {
-        throw new Error("Prevention tips generation failed to return a result.");
+      if (!treatmentResult) {
+        throw new Error("Treatment tips generation failed to return a result.");
       }
 
       return {
         success: true,
         detection: detectionResult,
-        prevention: preventionResult,
+        treatment: treatmentResult,
       };
     }
 

@@ -180,7 +180,7 @@ export function DiseaseDetector() {
                 Identify Plant Diseases in a Snap
             </h1>
             <p className="mt-4 text-lg text-foreground/80">
-                Upload a photo of a plant leaf, tell us the plant's name, and our AI will detect potential diseases and provide personalized care tips.
+                Upload a photo of a plant leaf, and our AI will identify the plant, detect potential diseases, and provide personalized care tips.
             </p>
         </div>
 
@@ -217,24 +217,11 @@ export function DiseaseDetector() {
             <Card className="w-full max-w-2xl mt-8 shadow-xl bg-card/80 backdrop-blur-sm">
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl">Get Started</CardTitle>
-                    <CardDescription>Fill in the details below to begin your analysis.</CardDescription>
+                    <CardDescription>Upload an image to begin your analysis.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form ref={formRef} action={formAction} className="space-y-6">
                         <input type="hidden" name="photoDataUri" ref={photoDataUriRef} />
-                        <div className="space-y-2">
-                            <Label htmlFor="plantName" className="text-lg font-semibold">Plant Name</Label>
-                            <Input
-                                id="plantName"
-                                name="plantName"
-                                placeholder="e.g., Tomato, Rose, Apple"
-                                required
-                                className="text-base py-6"
-                            />
-                             <p className="text-sm text-muted-foreground">
-                                Providing the plant name helps us give you more accurate prevention tips.
-                             </p>
-                        </div>
                         <div className="space-y-2">
                             <Label className="text-lg font-semibold">Plant Leaf Image</Label>
                             <label
@@ -299,4 +286,3 @@ export function DiseaseDetector() {
     </div>
   );
 }
-

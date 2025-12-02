@@ -23,6 +23,8 @@ const DetectDiseaseInputSchema = z.object({
 export type DetectDiseaseInput = z.infer<typeof DetectDiseaseInputSchema>;
 
 const DetectDiseaseOutputSchema = z.object({
+  plantName: z.string().describe('The common name of the plant.'),
+  scientificName: z.string().describe('The scientific name of the plant.'),
   diseaseDetected: z.boolean().describe('Whether a disease is detected or not.'),
   diseaseName: z.string().describe('The name of the detected disease, if any.'),
   confidence: z.number().describe('The confidence level of the disease detection.'),
@@ -37,11 +39,11 @@ const detectDiseasePrompt = ai.definePrompt({
   name: 'detectDiseasePrompt',
   input: {schema: DetectDiseaseInputSchema},
   output: {schema: DetectDiseaseOutputSchema},
-  prompt: `You are an expert plant pathologist. Analyze the image of the plant leaf and determine if any disease is present.
+  prompt: `You are an expert plant pathologist and botanist. Analyze the image of the plant leaf. First, identify the plant's common and scientific name. Then, determine if any disease is present.
 
   Image: {{media url=photoDataUri}}
 
-  Respond with whether a disease is detected, the name of the disease, and a confidence level.`,
+  Respond with the plant's common and scientific name, whether a disease is detected, the name of the disease, and a confidence level.`,
 });
 
 const detectDiseaseFlow = ai.defineFlow(

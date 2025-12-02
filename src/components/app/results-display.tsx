@@ -2,7 +2,7 @@ import type { FormState } from '@/app/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Sparkles, Sprout } from 'lucide-react';
 
 interface ResultsDisplayProps {
   results: FormState;
@@ -13,10 +13,37 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
     return null;
   }
 
-  const { detection, prevention } = results;
+  const { detection, treatment } = results;
 
   return (
     <section id="results" className="w-full max-w-2xl mx-auto space-y-8 py-8">
+      <Card className="bg-card/80 backdrop-blur-sm shadow-lg">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <Sprout className="size-8 text-primary" />
+            <div>
+              <CardTitle className="font-headline text-2xl">Plant Identification</CardTitle>
+              <CardDescription>
+                We've identified your plant.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <h3 className="font-semibold text-lg">{detection.plantName}</h3>
+                    <p className="text-sm text-muted-foreground">Common Name</p>
+                </div>
+                <div>
+                    <h3 className="font-semibold text-lg italic">{detection.scientificName}</h3>
+                    <p className="text-sm text-muted-foreground">Scientific Name</p>
+                </div>
+            </div>
+        </CardContent>
+      </Card>
+
+
       <Card className="bg-card/80 backdrop-blur-sm shadow-lg">
         <CardHeader>
           <div className="flex items-center gap-3">
@@ -26,7 +53,7 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
               <CheckCircle2 className="size-8 text-primary" />
             )}
             <div>
-              <CardTitle className="font-headline text-2xl">Analysis Complete</CardTitle>
+              <CardTitle className="font-headline text-2xl">Disease Analysis</CardTitle>
               <CardDescription>
                 {detection.diseaseDetected
                   ? `We've identified a potential issue.`
@@ -55,20 +82,20 @@ export function ResultsDisplay({ results }: ResultsDisplayProps) {
         </CardContent>
       </Card>
 
-      {prevention && prevention.preventionTips && (
+      {treatment && treatment.treatmentTips && (
         <Card className="bg-card/80 backdrop-blur-sm shadow-lg">
           <CardHeader>
              <div className="flex items-center gap-3">
               <Sparkles className="size-8 text-primary" />
               <div>
-                <CardTitle className="font-headline text-2xl">Personalized Prevention Plan</CardTitle>
-                <CardDescription>AI-generated tips to keep your plant thriving.</CardDescription>
+                <CardTitle className="font-headline text-2xl">Personalized Treatment Plan</CardTitle>
+                <CardDescription>AI-generated suggestions to help your plant recover.</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <ul className="list-disc space-y-2 pl-5 text-foreground/90">
-              {prevention.preventionTips.split('\n').map((tip, index) => (
+              {treatment.treatmentTips.split('\n').map((tip, index) => (
                 tip.trim() && <li key={index}>{tip.replace(/^- /, '')}</li>
               ))}
             </ul>

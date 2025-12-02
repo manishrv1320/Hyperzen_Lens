@@ -1,55 +1,55 @@
 'use server';
 /**
- * @fileOverview Generates personalized prevention tips for plant diseases.
+ * @fileOverview Generates personalized treatment tips for plant diseases.
  *
- * - generatePreventionTips - A function that generates personalized prevention tips.
- * - PreventionTipsInput - The input type for the generatePreventionTips function.
- * - PreventionTipsOutput - The return type for the generatePreventionTips function.
+ * - generateTreatmentTips - A function that generates personalized treatment tips.
+ * - TreatmentTipsInput - The input type for the generateTreatmentTips function.
+ * - TreatmentTipsOutput - The return type for the generateTreatmentTips function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const PreventionTipsInputSchema = z.object({
+const TreatmentTipsInputSchema = z.object({
   plantName: z.string().describe('The common name of the plant.'),
   diseaseName: z.string().describe('The name of the disease detected.'),
 });
-export type PreventionTipsInput = z.infer<typeof PreventionTipsInputSchema>;
+export type TreatmentTipsInput = z.infer<typeof TreatmentTipsInputSchema>;
 
-const PreventionTipsOutputSchema = z.object({
-  preventionTips: z
+const TreatmentTipsOutputSchema = z.object({
+  treatmentTips: z
     .string()
     .describe(
-      'A list of personalized prevention tips for the specified plant and disease.'
+      'A list of personalized treatment tips for the specified plant and disease.'
     ),
 });
-export type PreventionTipsOutput = z.infer<typeof PreventionTipsOutputSchema>;
+export type TreatmentTipsOutput = z.infer<typeof TreatmentTipsOutputSchema>;
 
-export async function generatePreventionTips(
-  input: PreventionTipsInput
-): Promise<PreventionTipsOutput> {
-  return generatePreventionTipsFlow(input);
+export async function generateTreatmentTips(
+  input: TreatmentTipsInput
+): Promise<TreatmentTipsOutput> {
+  return generateTreatmentTipsFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'preventionTipsPrompt',
-  input: {schema: PreventionTipsInputSchema},
-  output: {schema: PreventionTipsOutputSchema},
-  prompt: `You are an expert horticulturalist specializing in plant disease prevention.
+  name: 'treatmentTipsPrompt',
+  input: {schema: TreatmentTipsInputSchema},
+  output: {schema: TreatmentTipsOutputSchema},
+  prompt: `You are an expert horticulturalist specializing in plant disease treatment.
 
-  Based on the plant name and disease, provide a concise list of personalized prevention tips.
+  Based on the plant name and disease, provide a concise list of suggestions to cure the plant.
 
   Plant: {{{plantName}}}
   Disease: {{{diseaseName}}}
 
-  Prevention Tips:`,
+  Cure Suggestions:`,
 });
 
-const generatePreventionTipsFlow = ai.defineFlow(
+const generateTreatmentTipsFlow = ai.defineFlow(
   {
-    name: 'generatePreventionTipsFlow',
-    inputSchema: PreventionTipsInputSchema,
-    outputSchema: PreventionTipsOutputSchema,
+    name: 'generateTreatmentTipsFlow',
+    inputSchema: TreatmentTipsInputSchema,
+    outputSchema: TreatmentTipsOutputSchema,
   },
   async input => {
     const {output} = await prompt(input);
