@@ -58,6 +58,39 @@ export function DiseaseDetector() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const placeholderImage = PlaceHolderImages.find(img => img.id === 'plant-leaf-placeholder');
+  
+  useEffect(() => {
+    if (isCameraOpen) {
+      const getCameraPermission = async () => {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            setHasCameraPermission(true);
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+            }
+          } catch (error) {
+            console.error('Error accessing camera:', error);
+            setHasCameraPermission(false);
+            toast({
+              variant: 'destructive',
+              title: 'Camera Access Denied',
+              description: 'Please enable camera permissions in your browser settings.',
+            });
+            setIsCameraOpen(false);
+          }
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'Camera Not Supported',
+                description: 'Your browser does not support camera access.',
+            });
+            setIsCameraOpen(false);
+        }
+      };
+      getCameraPermission();
+    }
+  }, [isCameraOpen, toast]);
 
   useEffect(() => {
     if (state.error) {
@@ -82,31 +115,8 @@ export function DiseaseDetector() {
     }
   };
 
-  const handleOpenCamera = async () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setHasCameraPermission(true);
-        setIsCameraOpen(true);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-        setHasCameraPermission(false);
-        toast({
-          variant: 'destructive',
-          title: 'Camera Access Denied',
-          description: 'Please enable camera permissions in your browser settings.',
-        });
-      }
-    } else {
-        toast({
-            variant: 'destructive',
-            title: 'Camera Not Supported',
-            description: 'Your browser does not support camera access.',
-        });
-    }
+  const handleOpenCamera = () => {
+    setIsCameraOpen(true);
   };
 
   const handleCloseCamera = () => {
@@ -207,7 +217,7 @@ export function DiseaseDetector() {
                   </AlertDescription>
                 </Alert>
               )}
-              <Button onClick={handleCapture} className="w-full py-6 text-lg" disabled={!hasCameraPermission}>
+              <Button onClick={handleCapture} className="w-full py-6 text-lg" disabled={hasCameraPermission === false}>
                 <Camera className="mr-2" />
                 Capture Image
               </Button>
